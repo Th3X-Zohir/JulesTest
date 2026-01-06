@@ -12,18 +12,18 @@ This document outlines the feature gaps between the current initial scaffold and
 - [x] **Case Submission:** Logic to move cases from `Draft` to `Pending Approval`.
 - [x] **Lawyer Assignment:** Workflow for Litigants to assign Lawyers via email invite.
 - [x] **Serestadar Review:** Dashboard for court staff to review, approve/reject (with correction notes) cases.
-- [ ] **Judge Assignment:** UI for assigning judges (Logic exists in DB).
+- [x] **Judge Assignment:** UI for assigning judges by Serestadar.
 - [ ] **Case Editing:** Allowing edits only in `Draft` or `Correction Required` states.
 
 ## 3. Daily Cause List & Hearings (Priority: Medium)
 - [x] **Cause List Generation:** Logic to generate daily lists for each court (Public View).
 - [x] **Hearing Management:** Scheduling next hearing dates (Judge/Staff UI).
-- [ ] **Order Generation:** Judges interface to write orders and generate PDFs.
+- [x] **Order Generation:** Judges interface to write orders and generate PDFs.
 
 ## 4. Document Management (Priority: Medium)
 - [ ] **PDF Generation:**
     - [x] Arji (Petition)
-    - [ ] Order Sheets
+    - [x] Order Sheets
     - [ ] Summons
     - [ ] Verdicts
 - [ ] **Document Verification:** Public QR code verification endpoint (`/verify/{payload}`).

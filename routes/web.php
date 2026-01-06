@@ -52,6 +52,9 @@ Route::middleware([
     Route::post('/cases/{case}/hearings', [CaseController::class, 'storeHearing'])->name('cases.hearings.store');
     Route::post('/cases/{case}/approve', [CaseController::class, 'approve'])->name('cases.approve');
     Route::post('/cases/{case}/reject', [CaseController::class, 'reject'])->name('cases.reject');
+    Route::post('/cases/{case}/assign-judge', [CaseController::class, 'assignJudge'])->name('cases.assign-judge');
+    Route::post('/cases/{case}/orders', [App\Http\Controllers\CaseOrderController::class, 'store'])->name('cases.orders.store');
+    Route::get('/cases/{case}/orders/{order}/download', [App\Http\Controllers\CaseOrderController::class, 'download'])->name('cases.orders.download');
 });
 
 require __DIR__.'/auth.php';

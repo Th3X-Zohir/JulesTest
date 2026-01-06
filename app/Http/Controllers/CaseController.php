@@ -53,15 +53,32 @@ class CaseController extends Controller
 
     public function show(CourtCase $case): Response
     {
-        $case->load(['parties', 'caseStatus', 'caseLawyers.lawyer', 'assignedJudge']);
+        $case->load(['parties', 'caseStatus', 'caseLawyers.lawyer', 'assignedJudge', 'orders.judge']);
+
+        // Fetch Judges if user is Serestadar (for assignment)
+        $judges = auth()->user()->hasRole('Serestadar')
+            ? \App\Models\User::role('Judge')->get(['id', 'name'])
+            : [];
 
         return Inertia::render('Cases/Show', [
             'case' => $case,
+            'judges' => $judges,
             'auth' => [
                 'user' => auth()->user(),
                 'roles' => auth()->user()->getRoleNames(),
             ]
         ]);
+    }
+
+    public function assignJudge(Request $request, CourtCase $case)
+    {
+        if (!auth()->user()->hasRole('Serestadar')) abort(403);
+
+        $request->validate(['judge_id' => 'required|exists:users,id']);
+
+        $case->update(['assigned_judge_id' => $request->judge_id]);
+
+        return back()->with('success', 'Judge assigned successfully.');
     }
 
     public function inviteLawyer(Request $request, CourtCase $case)

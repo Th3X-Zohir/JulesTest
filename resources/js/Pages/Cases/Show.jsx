@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
-export default function Show({ case: caseData }) {
+export default function Show({ case: caseData, judges }) {
     const { auth } = usePage().props;
     const { data: inviteData, setData: setInviteData, post: postInvite, processing: inviteProcessing, errors: inviteErrors } = useForm({
         email: '',
@@ -25,6 +25,15 @@ export default function Show({ case: caseData }) {
     const { post: postApprove, processing: approveProcessing } = useForm();
     const { data: rejectData, setData: setRejectData, post: postReject, processing: rejectProcessing } = useForm({
         note: ''
+    });
+
+    const { data: judgeData, setData: setJudgeData, post: postJudge, processing: judgeProcessing } = useForm({
+        judge_id: ''
+    });
+
+    const { data: orderData, setData: setOrderData, post: postOrder, processing: orderProcessing, errors: orderErrors, reset: resetOrder } = useForm({
+        type: 'Interim',
+        content: ''
     });
 
     const handleInvite = (e) => {
@@ -60,6 +69,18 @@ export default function Show({ case: caseData }) {
         if(confirm('Return this case for correction?')) {
             postReject(route('cases.reject', caseData.id));
         }
+    }
+
+    const handleAssignJudge = (e) => {
+        e.preventDefault();
+        postJudge(route('cases.assign-judge', caseData.id));
+    }
+
+    const handleOrderSubmit = (e) => {
+        e.preventDefault();
+        postOrder(route('cases.orders.store', caseData.id), {
+            onSuccess: () => resetOrder()
+        });
     }
 
     return (
@@ -147,6 +168,27 @@ export default function Show({ case: caseData }) {
                                             ))}
                                         </tbody>
                                     </table>
+                                </div>
+                            )}
+
+                            {/* Order History */}
+                            {caseData.orders?.length > 0 && (
+                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                    <h3 className="text-lg font-medium mb-4">Orders Issued</h3>
+                                    <ul className="divide-y divide-gray-200">
+                                        {caseData.orders.map(order => (
+                                            <li key={order.id} className="py-4">
+                                                <div className="flex justify-between">
+                                                    <div>
+                                                        <span className="font-bold">{order.type} Order</span>
+                                                        <span className="text-gray-500 text-sm ml-2">by {order.judge.name} on {new Date(order.order_date).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <a href={route('cases.orders.download', [caseData.id, order.id])} className="text-blue-600 hover:underline text-sm">Download PDF</a>
+                                                </div>
+                                                <p className="mt-2 text-gray-600 whitespace-pre-wrap">{order.content}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             )}
                         </div>
@@ -248,6 +290,36 @@ export default function Show({ case: caseData }) {
                                 </div>
                             )}
 
+                            {/* Judge Assignment (Serestadar) */}
+                            {isSerestadar && caseData.case_status.slug === 'active' && (
+                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                    <h3 className="text-lg font-medium mb-4">Judge Assignment</h3>
+                                    {caseData.assigned_judge ? (
+                                        <p>Assigned Judge: <span className="font-bold">{caseData.assigned_judge.name}</span></p>
+                                    ) : (
+                                        <form onSubmit={handleAssignJudge} className="flex">
+                                            <select
+                                                className="block w-full rounded-md border-gray-300 shadow-sm"
+                                                value={judgeData.judge_id}
+                                                onChange={e => setJudgeData('judge_id', e.target.value)}
+                                            >
+                                                <option value="">Select Judge...</option>
+                                                {judges.map(j => (
+                                                    <option key={j.id} value={j.id}>{j.name}</option>
+                                                ))}
+                                            </select>
+                                            <button
+                                                type="submit"
+                                                disabled={judgeProcessing}
+                                                className="ml-2 bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 whitespace-nowrap"
+                                            >
+                                                Assign
+                                            </button>
+                                        </form>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Court Actions (Judge/Staff) */}
                             {(isJudge || isSerestadar) && caseData.case_status.slug === 'active' && (
                                 <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -283,6 +355,43 @@ export default function Show({ case: caseData }) {
                                             className="w-full bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-900"
                                         >
                                             Schedule Hearing
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
+
+                            {/* Judge Order Form */}
+                            {isJudge && caseData.case_status.slug === 'active' && (
+                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mt-6">
+                                    <h3 className="text-lg font-medium mb-4">Issue Order</h3>
+                                    <form onSubmit={handleOrderSubmit} className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Type</label>
+                                            <select
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                value={orderData.type}
+                                                onChange={e => setOrderData('type', e.target.value)}
+                                            >
+                                                <option value="Interim">Interim Order</option>
+                                                <option value="Final">Final Verdict</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Order Content</label>
+                                            <textarea
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                rows="4"
+                                                value={orderData.content}
+                                                onChange={e => setOrderData('content', e.target.value)}
+                                            ></textarea>
+                                            {orderErrors.content && <p className="text-red-500 text-xs">{orderErrors.content}</p>}
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={orderProcessing}
+                                            className="w-full bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900"
+                                        >
+                                            Issue Order
                                         </button>
                                     </form>
                                 </div>

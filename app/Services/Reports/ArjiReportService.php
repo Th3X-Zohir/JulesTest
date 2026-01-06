@@ -13,7 +13,7 @@ class ArjiReportService
         // For this scaffold, we construct simple HTML
 
         $mpdf = new Mpdf([
-            'default_font' => 'kalpurush', // Assuming font is available or fallback
+            // 'default_font' => 'kalpurush', // Disabled to prevent error in default setup
             'mode' => 'utf-8',
         ]);
 

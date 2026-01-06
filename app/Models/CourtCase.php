@@ -48,4 +48,9 @@ class CourtCase extends Model
     {
         return $this->hasMany(CaseHearing::class);
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(CaseOrder::class);
+    }
 }
