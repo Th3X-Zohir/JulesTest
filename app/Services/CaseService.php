@@ -4,15 +4,18 @@ namespace App\Services;
 
 use App\Models\CourtCase;
 use App\Models\CaseStatus;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class CaseService
 {
+    /**
+     * Create a new case draft.
+     */
     public function createCase(User $user, array $data): CourtCase
     {
         return DB::transaction(function () use ($user, $data) {
-            // Determine initial status (e.g., Draft or Pending Approval)
             $status = CaseStatus::where('slug', 'draft')->firstOrFail();
 
             $case = CourtCase::create([
@@ -24,7 +27,6 @@ class CaseService
                 'filing_date' => now(),
             ]);
 
-            // Add Parties
             if (isset($data['parties'])) {
                 foreach ($data['parties'] as $partyData) {
                     $case->parties()->create($partyData);
@@ -35,9 +37,31 @@ class CaseService
         });
     }
 
+    /**
+     * Submit a case for approval.
+     */
+    public function submitCase(CourtCase $case): CourtCase
+    {
+        if ($case->caseStatus->slug !== 'draft') {
+            throw new Exception("Only draft cases can be submitted.");
+        }
+
+        $pendingStatus = CaseStatus::where('slug', 'pending-approval')->firstOrFail();
+
+        $case->update([
+            'case_status_id' => $pendingStatus->id,
+            'filing_date' => now(), // Update filing date to submission time
+        ]);
+
+        return $case;
+    }
+
+    /**
+     * Generate a unique case number.
+     * Format: CASE-{Year}-{ID} (Simple implementation)
+     */
     public function generateCaseNumber(CourtCase $case): string
     {
-        // Simple logic for example: CASE-ID/YEAR
-        return "CASE-{$case->id}/{$case->year}";
+        return sprintf("CIVIL-%s-%06d", $case->year, $case->id);
     }
 }
