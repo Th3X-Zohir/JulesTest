@@ -50,4 +50,71 @@ class CaseController extends Controller
         return redirect()->route('cases.index')
             ->with('success', 'Case draft created successfully.');
     }
+
+    public function show(CourtCase $case): Response
+    {
+        $case->load(['parties', 'caseStatus', 'caseLawyers.lawyer', 'assignedJudge']);
+
+        return Inertia::render('Cases/Show', [
+            'case' => $case,
+            'auth' => [
+                'user' => auth()->user(),
+                'roles' => auth()->user()->getRoleNames(),
+            ]
+        ]);
+    }
+
+    public function inviteLawyer(Request $request, CourtCase $case)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $lawyer = \App\Models\User::where('email', $request->email)->firstOrFail();
+
+        // Ensure user is actually a lawyer
+        if (!$lawyer->hasRole('Lawyer')) abort(400, 'User is not a lawyer');
+
+        $this->caseService->inviteLawyer($case, $lawyer, $request->user());
+
+        return back()->with('success', 'Lawyer invited successfully.');
+    }
+
+    public function acceptLawyer(CourtCase $case)
+    {
+        $this->caseService->acceptLawyerInvitation($case, auth()->user());
+        return back()->with('success', 'Invitation accepted.');
+    }
+
+    public function submit(CourtCase $case)
+    {
+        $this->caseService->submitCase($case);
+        return back()->with('success', 'Case submitted for approval.');
+    }
+
+    public function storeHearing(Request $request, CourtCase $case, \App\Services\HearingService $hearingService)
+    {
+        if (!auth()->user()->isJudge() && !auth()->user()->isSerestadar()) abort(403);
+
+        $validated = $request->validate([
+            'hearing_date' => 'required|date|after:today',
+            'purpose' => 'required|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        $hearingService->scheduleHearing($case, $validated);
+
+        return back()->with('success', 'Hearing scheduled.');
+    }
+
+    public function approve(CourtCase $case, \App\Services\CaseApprovalService $approvalService)
+    {
+        $approvalService->approveCase(auth()->user(), $case);
+        return back()->with('success', 'Case approved and number assigned.');
+    }
+
+    public function reject(Request $request, CourtCase $case, \App\Services\CaseApprovalService $approvalService)
+    {
+        $request->validate(['note' => 'required|string']);
+        $approvalService->returnCase(auth()->user(), $case, $request->note);
+        return back()->with('success', 'Case returned for correction.');
+    }
 }

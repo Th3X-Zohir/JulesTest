@@ -9,20 +9,20 @@ This document outlines the feature gaps between the current initial scaffold and
 - [ ] **Profile Management:** Photo upload, Digital Signature upload/creation.
 
 ## 2. Case Management Workflow (Priority: High)
-- [ ] **Case Submission:** Logic to move cases from `Draft` to `Pending Approval`.
-- [ ] **Lawyer Assignment:** Workflow for Litigants to assign Lawyers before submission.
-- [ ] **Serestadar Review:** Dashboard for court staff to review, approve/reject (with correction notes) cases.
-- [ ] **Judge Assignment:** Logic to assign cases to judges automatically or manually.
+- [x] **Case Submission:** Logic to move cases from `Draft` to `Pending Approval`.
+- [x] **Lawyer Assignment:** Workflow for Litigants to assign Lawyers via email invite.
+- [x] **Serestadar Review:** Dashboard for court staff to review, approve/reject (with correction notes) cases.
+- [ ] **Judge Assignment:** UI for assigning judges (Logic exists in DB).
 - [ ] **Case Editing:** Allowing edits only in `Draft` or `Correction Required` states.
 
 ## 3. Daily Cause List & Hearings (Priority: Medium)
-- [ ] **Cause List Generation:** Logic to generate daily lists for each court.
-- [ ] **Hearing Management:** Scheduling next hearing dates, recording attendance.
+- [x] **Cause List Generation:** Logic to generate daily lists for each court (Public View).
+- [x] **Hearing Management:** Scheduling next hearing dates (Judge/Staff UI).
 - [ ] **Order Generation:** Judges interface to write orders and generate PDFs.
 
 ## 4. Document Management (Priority: Medium)
 - [ ] **PDF Generation:**
-    - [x] Arji (Petition) - *Planned for Phase 2*
+    - [x] Arji (Petition)
     - [ ] Order Sheets
     - [ ] Summons
     - [ ] Verdicts
@@ -41,11 +41,3 @@ This document outlines the feature gaps between the current initial scaffold and
 - [ ] **Payments:** Shurjopay gateway integration for court fees.
 - [ ] **Localization:** Full Bengali translations for frontend and backend.
 - [ ] **Audit Logging:** Comprehensive tracking of all user actions.
-
----
-
-## Immediate Next Steps (Phase 2 Plan)
-1. **Case Submission Logic:** Enable users to submit drafts.
-2. **Serestadar Approval:** Allow court staff to approve cases and generate Case Numbers.
-3. **Role-Based Dashboards:** Distinct views for Litigants vs. Staff.
-4. **Basic PDF:** Generate the Case Petition (Arji) PDF.

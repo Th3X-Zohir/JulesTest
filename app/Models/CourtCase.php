@@ -38,4 +38,14 @@ class CourtCase extends Model
     {
         return $this->hasMany(CaseParty::class);
     }
+
+    public function caseLawyers(): HasMany
+    {
+        return $this->hasMany(CaseLawyer::class);
+    }
+
+    public function hearings(): HasMany
+    {
+        return $this->hasMany(CaseHearing::class);
+    }
 }

@@ -64,4 +64,34 @@ class CaseService
     {
         return sprintf("CIVIL-%s-%06d", $case->year, $case->id);
     }
+
+    /**
+     * Invite a lawyer to a case.
+     */
+    public function inviteLawyer(CourtCase $case, User $lawyer, User $requester): void
+    {
+        // Check if already assigned
+        if ($case->caseLawyers()->where('lawyer_id', $lawyer->id)->exists()) {
+            throw new Exception("Lawyer is already assigned or invited.");
+        }
+
+        $case->caseLawyers()->create([
+            'lawyer_id' => $lawyer->id,
+            'assigned_by' => $requester->id,
+            'status' => 'pending',
+        ]);
+    }
+
+    /**
+     * Accept a lawyer invitation.
+     */
+    public function acceptLawyerInvitation(CourtCase $case, User $lawyer): void
+    {
+        $assignment = $case->caseLawyers()
+            ->where('lawyer_id', $lawyer->id)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $assignment->update(['status' => 'accepted']);
+    }
 }

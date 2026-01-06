@@ -22,6 +22,8 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/cause-list', [App\Http\Controllers\CauseListController::class, 'index'])->name('cause-list');
+
 use App\Models\CourtCase;
 
 Route::middleware([
@@ -44,6 +46,12 @@ Route::middleware([
     // Case Management Routes
     Route::resource('cases', CaseController::class);
     Route::get('/cases/{case}/download-arji', [App\Http\Controllers\ReportController::class, 'downloadArji'])->name('cases.download-arji');
+    Route::post('/cases/{case}/invite-lawyer', [CaseController::class, 'inviteLawyer'])->name('cases.invite-lawyer');
+    Route::post('/cases/{case}/accept-lawyer', [CaseController::class, 'acceptLawyer'])->name('cases.accept-lawyer');
+    Route::post('/cases/{case}/submit', [CaseController::class, 'submit'])->name('cases.submit');
+    Route::post('/cases/{case}/hearings', [CaseController::class, 'storeHearing'])->name('cases.hearings.store');
+    Route::post('/cases/{case}/approve', [CaseController::class, 'approve'])->name('cases.approve');
+    Route::post('/cases/{case}/reject', [CaseController::class, 'reject'])->name('cases.reject');
 });
 
 require __DIR__.'/auth.php';
